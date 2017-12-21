@@ -1,0 +1,53 @@
+{
+	"preset": "jquery", // 使用jquery验证规则
+	"requireCurlyBraces": null,
+	"fix": true,
+	"fileExtensions": [".js", ".jsx"],
+	"extract": ["*.htm", "*.html"],
+	"excludeFiles": ["node_modules/**"], // 排除文件或目录
+	"maxErrors": 50,
+	"disallowMultipleLineBreaks": true, // 不允许多个换行
+
+	/**************************
+	Valid:
+	var x = "multi" +
+			"line";
+	var y = "single line";
+
+	Invalid:
+	var x = "multi \
+			line";
+	****************************/
+	"disallowMultipleLineStrings": true, // 不允许多行字符串
+	"disallowTrailingWhitespace": true, // 设置在每一行JS语句的尾随不能有空格字符
+	"disallowEmptyBlocks": true, // 不允许空函数
+	"disallowSpaceAfterPrefixUnaryOperators": [ // Valid: x = !y; y = ++z;  Invalid: x = ! y; y = ++ z;
+		"!",
+		"+",
+		"++",
+		"-",
+		"--",
+		"~"
+	],
+	"disallowSpaceBeforeBinaryOperators": [ // Valid: x+ y;  Invalid: x + y;
+		","
+	],
+	"disallowSpaceBeforePostfixUnaryOperators": true, // Valid: x = y++; y = z--;  Invalid: x = y ++; y = z --;
+	"requireCapitalizedConstructors": true, // 需要大写的构造函数
+	"requireCurlyBraces": [ // 在以下关键字后需要大括号
+		"if",
+		"else",
+		"for",
+		"while",
+		"do",
+		"switch",
+		"return",
+		"try",
+		"catch",
+		"finally"
+	],
+	"requireDotNotation": true, // 设置使用点符号 如  window.a = 1;
+	"requireLineFeedAtFileEnd": true, // 在文件的最后一行加一个空白行，true验证 false不验证
+	"requireOperatorBeforeLineBreak": ["?", "/", "*", "+", "-", "=", "==", "===", "!=", "!==", ">", ">=", "<", "<="], // 设置在以下操作前不能断行
+	"requireSpaceAfterKeywords": ["if", "else", "for", "while", "do", "switch", "return", "try", "catch", "function"], // 设置关键词后需要空格
+}

@@ -1,0 +1,36 @@
+{
+	"excludedFiles": [
+		"fonts.less",
+		"normalize.less"
+	],
+	"stringQuotes": {
+		"enabled": true,
+		"style": "double"
+	},
+	"propertyOrdering": {
+		"enabled": false
+	},
+	"zeroUnit": {
+		"enabled": true,
+		"style": "no_unit"
+	},
+	"spaceAroundComma": {
+		"allowNewline": true
+	},
+	"qualifyingElement": {
+		"allowWithAttribute": true,
+		"allowWithClass": true
+	},
+	"borderZero": {
+		"style": "zero"
+	},
+	"hexLength": {
+		"style": "short"
+	},
+	"decimalZero": {
+		"style": "none"
+	},
+	"importantRule": {
+		"enabled": false
+	}
+}
