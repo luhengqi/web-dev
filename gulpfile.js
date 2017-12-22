@@ -2,7 +2,7 @@
 * @Author: luhengqi
 * @Date:   2017-09-18 17:43:59
 * @Last Modified by:   Luhengqi
-* @Last Modified time: 2017-12-21 17:14:00
+* @Last Modified time: 2017-12-22 18:38:00
 */
 var gulp					= require('gulp'),
 	watch					= require('gulp-watch'),
@@ -22,124 +22,174 @@ var gulp					= require('gulp'),
 	consolidate				= require('gulp-consolidate'),
 	iconfont				= require('gulp-iconfont'),
 	iconfontCss				= require('gulp-iconfont-css'),
+	batch					= require('gulp-batch'),
+	del						= require('del'),
 	tiny					= require('gulp-tinypng-nokey'),
 	autoprefix				= new LessPluginAutoPrefix({
 		browsers: ['last 5 versions'],
 		cascade: true
 	});
 
+var paths = {
+	dist: 'dist/',
+	svgs: {
+		dev: 'dev/svg/',
+		tpl: 'dev/tpl/',
+		fonts: 'dist/css/fonts/'
+	},
+	images: {
+		dev: 'dev/images/',
+		dist: 'dist/images/'
+	},
+	styles: {
+		dev: 'dev/less/',
+		dist: 'dist/css/'
+	},
+	scripts: {
+		dev: 'dev/js/',
+		dist: 'dist/js/'
+	}
+};
+
+gulp.task('cleanIconfont', function() {
+	del([
+		paths.styles.dist + '**',
+		paths.styles.dev + 'fonts.less',
+		paths.dist + 'fonts.html'
+	]).then(console.log);
+});
+
 gulp.task('iconfont', function() {
-	var svgSrc      = 'dev/svg/*.svg',
-		fontName    = 'icon',
+	var fontName    = 'icon',
 		className   = 'icon',
 		timestamp   = Math.round(Date.now() / 1000);
 
-	gulp.src(svgSrc)
+	gulp.src(paths.svgs.dev + '*.svg')
 		.pipe(iconfont({
-			fontName,
-			prependUnicode: true, // recommended option
+			fontName: fontName,
+			prependUnicode: false, // recommended option
 			formats: ['ttf', 'eot', 'woff', 'svg'],
-			timestamp, // recommended to get consistent builds when watching files
+			timestamp: timestamp, // recommended to get consistent builds when watching files
 			fontHeight: 1001,
-			descent: 180,//The font descent. It is usefull to fix the font baseline yourself.
+			descent: 180, //The font descent. It is usefull to fix the font baseline yourself.
 			normalize: true
 		}))
 		.on('glyphs', function(glyphs) {
 			var options = {
-				className,
-				fontName,
-				fontPath: 'dist/css/fonts/', // set path to font (from your CSS file if relative)
-				glyphs: glyphs.sort((a, b) => {
+				className: className,
+				fontName: fontName,
+				fontPath: paths.svgs.fonts, // set path to font (from your CSS file if relative)
+				glyphs: glyphs.sort(function(a, b) {
 					return a.name.localeCompare(b.name);
 				}).map(mapGlyphs)
 			};
 
-			gulp.src('dev/tpl/fonts.css')
+			gulp.src(paths.svgs.tpl + 'fonts.css')
 				.pipe(consolidate('lodash', options))
 				.pipe(rename({
 					basename: fontName,
 					extname: '.css'
 				}))
-				.pipe(gulp.dest('dist/css/'));
+				.pipe(gulp.dest(paths.styles.dist));
 
-			gulp.src('dev/tpl/fonts.less')
+			gulp.src(paths.svgs.tpl + 'fonts.less')
 				.pipe(consolidate('lodash', options))
-				.pipe(gulp.dest('dev/less/'));
+				.pipe(gulp.dest(paths.styles.dev));
 
-			gulp.src('dev/tpl/fonts.html')
+			gulp.src(paths.svgs.tpl + 'fonts.html')
 				.pipe(consolidate('lodash', options))
 				.pipe(gulp.dest('dist'));
 		})
-		.pipe(gulp.dest('dist/css/fonts/'));
+		.pipe(gulp.dest(paths.svgs.fonts));
 });
 
 function mapGlyphs(glyph) {
 	return {
 		name: glyph.name,
 		codepoint: glyph.unicode[0].charCodeAt(0)
-	}
+	};
 }
 
 gulp.task('copy', function() {
 	gulp.src(['node_modules/jquery/dist/jquery.min.js'])
 		.pipe(rename('jquery.js'))
-		.pipe(gulp.dest('dev/js/'));
+		.pipe(gulp.dest(paths.scripts.dev));
 
 	gulp.src(['node_modules/normalize.css/normalize.css'])
 		.pipe(rename('normalize.less'))
-		.pipe(gulp.dest('dev/less/'))
+		.pipe(gulp.dest(paths.styles.dev));
+});
+
+gulp.task('cleanTinypng', function() {
+	del([paths.images.dist + '*']).then(console.log);
 });
 
 gulp.task('tinypng', function() {
-	gulp.src('dev/images/*')
+	gulp.src(paths.images.dev + '*')
 		.pipe(tiny())
-		.pipe(gulp.dest('dist/images/'));
+		.pipe(gulp.dest(paths.images.dist));
 });
 
 gulp.task('js-hint', function() {
-	return gulp.src(['dev/js/*.js', '!dev/js/inview.js'])
+	return gulp.src([
+			paths.scripts.dev + '*.js'
+		])
 		.pipe(jshint(jshintConfig))
-		.pipe(jshint.reporter('default'))
+		.pipe(jshint.reporter('default'));
 });
 
 gulp.task('html-hint', function() {
-	return gulp.src(['*.html'])
+	return gulp.src([paths.dist + '*.html'])
 		.pipe(htmlhint('.htmlhintrc'))
-		.pipe(htmlhint.reporter())
+		.pipe(htmlhint.reporter());
 });
 
 gulp.task('less', function() {
-	return gulp.src(['dev/less/style.less'])
+	return gulp.src([paths.styles.dev + 'style.less'])
 		.pipe(plumber())
 		.pipe(less({
 			plugins: [autoprefix]
 		}))
 		.pipe(minifyCSS())
-		.pipe(gulp.dest('dist/css'))
+		.pipe(gulp.dest(paths.styles.dist));
 });
 
 gulp.task('less-hint', function() {
-	return gulp.src(['dev/less/*.less'])
+	return gulp.src([paths.styles.dev + '*.less'])
 		.pipe(lesshint())
 		.pipe(lesshint.reporter('default')) // Leave empty to use the default, "stylish"
 		.pipe(lesshint.failOnError()); // Use this to fail the task on lint errors
 });
 
 gulp.task('indent-hint', function() {
-	return gulp.src(['dev/less/*.less', '*.html', 'dev/js/*.js', '!dev/js/inview.js'])
+	return gulp.src([
+		paths.styles.dev + '*.less',
+		paths.dist + '*.html',
+		paths.scripts.dev + '*.js',
+		'!' + paths.styles.dev + 'normalize.less'
+	])
 	.pipe(lintspaces({
 		trailingspaces: true,
 		indentation: 'tabs',
 		ignores: [/\/\*[\s\S]*?\*\//g, /foo bar/g ]
 	}))
-	.pipe(lintspaces.reporter())
+	.pipe(lintspaces.reporter());
 });
 
-gulp.task('watch', function() {
-	gulp.watch(['dev/less/*.less'], ['less-hint', 'less']);
-	gulp.watch(['dev/less/*.less', '*.html', 'dev/js/*.js'], ['indent-hint']);
-	gulp.watch(['*.html'], ['html-hint']);
-	gulp.watch(['dev/js/*.js'], ['js-hint']);
-	gulp.watch(['dev/svg/*.svg'], ['iconfont']);
-	gulp.watch(['dev/images/*'], ['tinypng']);
+gulp.task('default', function() {
+	gulp.watch(paths.styles.dev + '*.less', ['less-hint', 'less', 'indent-hint']);
+	gulp.watch(paths.dist + '*.html', ['html-hint', 'indent-hint']);
+	gulp.watch(paths.scripts.dev + '*.js', ['js-hint', 'indent-hint']);
+
+	watch(paths.svgs.dev + '*.svg', batch(function(events, cb) {
+		events.on('data', function() {
+			gulp.start(['cleanIconfont', 'iconfont']);
+		}).on('end', cb);
+	}));
+
+	watch(paths.images.dev + '*', batch(function(events, cb) {
+		events.on('data', function() {
+			gulp.start(['cleanTinypng', 'tinypng']);
+		}).on('end', cb);
+	}));
 });
