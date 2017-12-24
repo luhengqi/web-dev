@@ -1,8 +1,8 @@
 /*
 * @Author: luhengqi
 * @Date:   2017-09-18 17:43:59
-* @Last Modified by:   Luhengqi
-* @Last Modified time: 2017-12-22 18:38:00
+* @Last Modified by:   luhengqi
+* @Last Modified time: 2017-12-24 20:08:12
 */
 var gulp					= require('gulp'),
 	watch					= require('gulp-watch'),
@@ -130,6 +130,19 @@ gulp.task('tinypng', function() {
 		.pipe(gulp.dest(paths.images.dist));
 });
 
+
+gulp.task('jsMin', function(){
+	return gulp.src([
+			'dev/js/common.js'
+		])
+		.pipe(jshint(jshintConfig))
+		.pipe(jshint.reporter('default'))
+		.pipe(uglify())
+		.pipe(concat('common.js'))
+		.on('error', showError)
+		.pipe(gulp.dest('js'));
+});
+
 gulp.task('js-hint', function() {
 	return gulp.src([
 			paths.scripts.dev + '*.js'
@@ -179,7 +192,7 @@ gulp.task('indent-hint', function() {
 gulp.task('default', function() {
 	gulp.watch(paths.styles.dev + '*.less', ['less-hint', 'less', 'indent-hint']);
 	gulp.watch(paths.dist + '*.html', ['html-hint', 'indent-hint']);
-	gulp.watch(paths.scripts.dev + '*.js', ['js-hint', 'indent-hint']);
+	gulp.watch(paths.scripts.dev + '*.js', ['jsMin', 'js-hint', 'indent-hint']);
 
 	watch(paths.svgs.dev + '*.svg', batch(function(events, cb) {
 		events.on('data', function() {
