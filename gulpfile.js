@@ -1,8 +1,8 @@
 /*
 * @Author: luhengqi
 * @Date:   2017-09-18 17:43:59
-* @Last Modified by:   luhengqi
-* @Last Modified time: 2017-12-24 20:08:12
+* @Last Modified by:   Luhengqi
+* @Last Modified time: 2017-12-25 14:50:36
 */
 var gulp					= require('gulp'),
 	watch					= require('gulp-watch'),
@@ -133,7 +133,7 @@ gulp.task('tinypng', function() {
 
 gulp.task('jsMin', function(){
 	return gulp.src([
-			'dev/js/common.js'
+			paths.scripts.dev + 'common.js'
 		])
 		.pipe(jshint(jshintConfig))
 		.pipe(jshint.reporter('default'))
