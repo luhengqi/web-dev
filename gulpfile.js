@@ -2,7 +2,7 @@
 * @Author: luhengqi
 * @Date:   2017-09-18 17:43:59
 * @Last Modified by:   Luhengqi
-* @Last Modified time: 2017-12-25 14:50:36
+* @Last Modified time: 2018-08-02 13:15:39
 */
 var gulp					= require('gulp'),
 	watch					= require('gulp-watch'),
@@ -12,6 +12,7 @@ var gulp					= require('gulp'),
 	pkg						= require('./package'),
 	jshintConfig			= pkg.jshintConfig,
 	jshint					= require('gulp-jshint'),
+	uglify					= require('gulp-uglify'),
 	lesshint				= require('gulp-lesshint'),
 	lintspaces				= require('gulp-lintspaces'),
 	less					= require('gulp-less'),
@@ -139,8 +140,8 @@ gulp.task('jsMin', function(){
 		.pipe(jshint.reporter('default'))
 		.pipe(uglify())
 		.pipe(concat('common.js'))
-		.on('error', showError)
-		.pipe(gulp.dest('js'));
+		// .on('error', showError)
+		.pipe(gulp.dest(paths.scripts.dist));
 });
 
 gulp.task('js-hint', function() {
